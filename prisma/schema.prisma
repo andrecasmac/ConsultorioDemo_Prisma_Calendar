@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model pacientes {
+  id               Int       @id @default(autoincrement())
+  nombre           String?   @db.VarChar(45)
+  apellido         String?   @db.VarChar(45)
+  fecha_nacimiento DateTime? @db.Date
+  telefono         String?   @db.VarChar(45)
+  visitas          visitas[]
+}
+
+model visitas {
+  idvisitas             Int        @id @default(autoincrement())
+  fecha                 DateTime?  @db.Date
+  padecimiento          String?    @db.VarChar(600)
+  exploracion           String?    @db.VarChar(500)
+  tratamiento_act       String?    @db.VarChar(255)
+  tratamiento_hom       String?    @db.VarChar(255)
+  paciente_id           Int
+  paciente              pacientes  @relation(fields: [paciente_id], references: [id])
+
+  @@index([paciente_id], map: "visitas_paciente_id_fkey")
+}
+
