@@ -4,6 +4,9 @@ import { format, parseISO } from 'date-fns';
 import { getPatientById } from '@/lib/data';
 import { AddVisitForm } from '@/components/add-visit-form';
 import { DeleteVisitDialog } from '@/components/delete-visit-dialog';
+import { EditPatientDialog } from '@/components/edit-patient-dialog';
+import { DeletePatientDialog } from '@/components/delete-patient-dialog';
+import { EditVisitDialog } from '@/components/edit-visit-dialog';
 import {
   Card,
   CardContent,
@@ -19,6 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,11 +41,19 @@ export default async function PatientDetailPage({ params }: { params: { id: stri
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline text-3xl">{patient.name}</CardTitle>
-          <CardDescription className="text-lg">
-            Fecha de nacimiento: {format(parseISO(patient.dob), "d 'de' MMMM, yyyy")}
-          </CardDescription>
-           {patient.phone && <CardDescription className="text-base">Teléfono: {patient.phone}</CardDescription>}
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="font-headline text-3xl">{patient.name}</CardTitle>
+              <CardDescription className="text-lg">
+                Fecha de nacimiento: {format(parseISO(patient.dob), "d 'de' MMMM, yyyy")}
+              </CardDescription>
+              {patient.phone && <CardDescription className="text-base">Teléfono: {patient.phone}</CardDescription>}
+            </div>
+            <div className="flex gap-2">
+              <EditPatientDialog patient={patient} />
+              <DeletePatientDialog patientId={patient.id} />
+            </div>
+          </div>
         </CardHeader>
       </Card>
 
@@ -76,7 +89,10 @@ export default async function PatientDetailPage({ params }: { params: { id: stri
                         <TableCell className="whitespace-pre-wrap">{visit.tratamientoActual}</TableCell>
                         <TableCell className="whitespace-pre-wrap">{visit.tratamientoHomeopatico}</TableCell>
                         <TableCell className="text-right">
-                          <DeleteVisitDialog patientId={patient.id} visitId={visit.id} />
+                          <div className="flex justify-end gap-2">
+                            <EditVisitDialog visit={visit} />
+                            <DeleteVisitDialog patientId={patient.id} visitId={visit.id} />
+                          </div>
                         </TableCell>
                     </TableRow>
                     ))
