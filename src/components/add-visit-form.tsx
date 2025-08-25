@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { registerLocale, setDefaultLocale } from  "react-datepicker";
+import { es } from 'date-fns/locale/es';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -33,6 +34,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+registerLocale('es', es)
 
 const visitFormSchema = z.object({
   date: z.date({ required_error: 'Se requiere una fecha de visita.' }),
@@ -80,7 +83,12 @@ export function AddVisitForm({ patientId }: { patientId: string }) {
         });
         setIsCollapsibleOpen(false);
     } else {
-        const errorMessage = result?.errors?._form?.join(', ') || 'Error al agregar la visita.';
+        const errorMessage =
+          result?.errors
+            ? Object.values(result.errors)
+                .flat()
+                .join(', ')
+            : 'Error al agregar la visita.';
         toast({
             variant: 'destructive',
             title: 'Error',
@@ -118,11 +126,12 @@ export function AddVisitForm({ patientId }: { patientId: string }) {
                         name="date"
                         render={({ field }) => (
                             <DatePicker
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                 placeholderText="DD-MM-AAAA"
                                 onChange={(date) => field.onChange(date)}
                                 selected={field.value}
                                 dateFormat="dd-MM-yyyy"
+                                locale="es"
                             />
                         )}
                     />
