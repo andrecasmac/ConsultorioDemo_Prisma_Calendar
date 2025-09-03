@@ -1,9 +1,127 @@
 import { PrismaClient } from '@prisma/client';
-import type { Visit, Patient } from '@/lib/types';
+import type { Visit, Patient, PatientSummary, PaginationParams, PaginatedResult } from '@/lib/types';
 import { formatISO, format } from 'date-fns';
 
-const prisma = new PrismaClient();
+// Global prisma instance with connection management
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
+const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+});
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+// Get paginated patients with search (without visits for performance)
+export async function getPatientsPaginated(params: PaginationParams): Promise<PaginatedResult<PatientSummary>> {
+  const { page, limit, search } = params;
+  const skip = (page - 1) * limit;
+
+  let total: number;
+  let pacientes: any[];
+
+  try {
+    if (search && search.trim()) {
+      // Use raw SQL for better MySQL search performance
+      const searchTerm = `%${search.trim()}%`;
+      
+      // Get total count with search
+      const countResult = await prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) as count 
+        FROM pacientes 
+        WHERE LOWER(nombre) LIKE LOWER(${searchTerm}) 
+           OR LOWER(apellido) LIKE LOWER(${searchTerm})
+      `;
+      total = Number(countResult[0].count);
+
+      // Get paginated results with search
+      pacientes = await prisma.$queryRaw<any[]>`
+        SELECT 
+          p.id,
+          p.nombre,
+          p.apellido,
+          p.fecha_nacimiento,
+          p.telefono,
+          COUNT(v.idvisitas) as visitCount
+        FROM pacientes p
+        LEFT JOIN visitas v ON p.id = v.paciente_id
+        WHERE LOWER(p.nombre) LIKE LOWER(${searchTerm}) 
+           OR LOWER(p.apellido) LIKE LOWER(${searchTerm})
+        GROUP BY p.id, p.nombre, p.apellido, p.fecha_nacimiento, p.telefono
+        ORDER BY p.nombre ASC
+        LIMIT ${limit} OFFSET ${skip}
+      `;
+    } else {
+      // No search - use regular Prisma query
+      total = await prisma.pacientes.count();
+      
+      pacientes = await prisma.pacientes.findMany({
+        select: {
+          id: true,
+          nombre: true,
+          apellido: true,
+          fecha_nacimiento: true,
+          telefono: true,
+          _count: {
+            select: { visitas: true }
+          }
+        },
+        skip,
+        take: limit,
+        orderBy: { nombre: 'asc' }
+      });
+    }
+
+    const data: PatientSummary[] = pacientes.map((p) => ({
+      id: p.id.toString(),
+      name: `${p.nombre || ''} ${p.apellido || ''}`,
+      firstName: p.nombre || '',
+      lastName: p.apellido || '',
+      dob: p.fecha_nacimiento ? format(p.fecha_nacimiento, 'yyyy-MM-dd') : '',
+      phone: p.telefono || undefined,
+      visitCount: search ? Number(p.visitCount) : p._count.visitas,
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  } catch (error) {
+    console.error('Error in getPatientsPaginated:', error);
+    
+    // Fallback to basic query if search fails
+    if (search && search.trim()) {
+      console.log('Falling back to basic search...');
+      return getPatientsPaginated({ ...params, search: undefined });
+    }
+    
+    throw error;
+  }
+}
+
+// Get patient visit count efficiently (without loading visits)
+export async function getPatientVisitCount(patientId: string): Promise<number> {
+  const id = parseInt(patientId, 10);
+  if (isNaN(id)) return 0;
+
+  const count = await prisma.visitas.count({
+    where: { paciente_id: id }
+  });
+
+  return count;
+}
+
+// Get patients with visits (for backward compatibility - use sparingly)
 export async function getPatients(): Promise<Patient[]> {
   const pacientes = await prisma.pacientes.findMany({
     include: {
@@ -30,6 +148,7 @@ export async function getPatients(): Promise<Patient[]> {
   }));
 }
 
+// Get patient by ID with visits (for detail views)
 export async function getPatientById(id: string): Promise<Patient | undefined> {
   const patientId = parseInt(id, 10);
   if (isNaN(patientId)) return undefined;
@@ -193,4 +312,55 @@ export async function updateVisit(visitId: string, visitData: Omit<Visit, 'id' |
         tratamientoActual: updatedVisitRecord.tratamiento_act || '',
         tratamientoHomeopatico: updatedVisitRecord.tratamiento_hom || '',
     };
+}
+
+// Get paginated visits for a patient
+export async function getPatientVisitsPaginated(
+  patientId: string, 
+  params: Omit<PaginationParams, 'search'>
+): Promise<PaginatedResult<Visit>> {
+  const id = parseInt(patientId, 10);
+  if (isNaN(id)) {
+    throw new Error('Invalid patient ID');
+  }
+
+  const { page, limit } = params;
+  const skip = (page - 1) * limit;
+
+  // Get total count
+  const total = await prisma.visitas.count({
+    where: { paciente_id: id }
+  });
+
+  // Get paginated visits
+  const visitas = await prisma.visitas.findMany({
+    where: { paciente_id: id },
+    orderBy: { fecha: 'desc' },
+    skip,
+    take: limit,
+  });
+
+  const data: Visit[] = visitas.map((v) => ({
+    id: v.idvisitas.toString(),
+    patientId: v.paciente_id.toString(),
+    date: v.fecha ? format(v.fecha, 'yyyy-MM-dd') : '',
+    padecimiento: v.padecimiento || '',
+    exploracion: v.exploracion || '',
+    tratamientoActual: v.tratamiento_act || '',
+    tratamientoHomeopatico: v.tratamiento_hom || '',
+  }));
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    },
+  };
 }

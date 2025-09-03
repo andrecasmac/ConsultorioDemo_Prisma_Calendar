@@ -45,7 +45,7 @@ export default async function PatientDetailPage({ params }: { params: { id: stri
             <div>
               <CardTitle className="font-headline text-3xl">{patient.name}</CardTitle>
               <CardDescription className="text-lg">
-                Fecha de nacimiento: {format(parseISO(patient.dob), "d 'de' MMMM, yyyy")}
+                {patient.dob && `Fecha de nacimiento: ${format(parseISO(patient.dob), "d 'de' MMMM, yyyy")}`}
               </CardDescription>
               {patient.phone && <CardDescription className="text-base">Teléfono: {patient.phone}</CardDescription>}
             </div>

@@ -17,6 +17,11 @@ model pacientes {
   fecha_nacimiento DateTime? @db.Date
   telefono         String?   @db.VarChar(45)
   visitas          visitas[]
+
+  // Indexes for search and pagination performance
+  @@index([nombre], map: "idx_pacientes_nombre")
+  @@index([apellido], map: "idx_pacientes_apellido")
+  @@index([nombre, apellido], map: "idx_pacientes_nombre_apellido")
 }
 
 model visitas {
@@ -30,5 +35,6 @@ model visitas {
   paciente              pacientes  @relation(fields: [paciente_id], references: [id])
 
   @@index([paciente_id], map: "visitas_paciente_id_fkey")
+  @@index([fecha], map: "idx_visitas_fecha")
 }
 

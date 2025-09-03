@@ -1,11 +1,12 @@
-import { getPatients } from '@/lib/data';
+import { getPatientsPaginated } from '@/lib/data';
 import { PatientSearch } from '@/components/patient-search';
 import { CreatePatientDialog } from '@/components/create-patient-dialog';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const patients = await getPatients();
+  // Get initial page of patients (first 20)
+  const initialData = await getPatientsPaginated({ page: 1, limit: 20 });
 
   return (
     <div className="space-y-6">
@@ -16,7 +17,7 @@ export default async function DashboardPage() {
         </div>
         <CreatePatientDialog />
       </div>
-      <PatientSearch patients={patients} />
+      <PatientSearch initialData={initialData} />
     </div>
   );
 }
