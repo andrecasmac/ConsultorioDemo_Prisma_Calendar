@@ -45,14 +45,6 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Cerrar sesión">
-                <Link href="/">
-                  <LogOut />
-                  <span>Cerrar sesión</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
