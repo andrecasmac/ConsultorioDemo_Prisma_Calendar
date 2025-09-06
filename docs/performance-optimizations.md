@@ -7,7 +7,7 @@ This document outlines the performance optimizations implemented to handle large
 
 ### 1. Pagination
 - **Patient List**: Implemented server-side pagination with configurable page sizes (default: 20 patients per page)
-- **Visit Lists**: Added pagination for patient visits to handle patients with many medical records
+- **Visit Lists**: Currently, visit lists are not paginated. All visits for a patient are loaded at once.
 - **URL State**: Pagination state is maintained in the URL for better UX and sharing
 
 ### 2. Efficient Data Loading

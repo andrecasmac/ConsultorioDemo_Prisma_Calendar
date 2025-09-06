@@ -6,7 +6,6 @@
 - Patient Creation Form: Form to create new patients with fields for name and date of birth.
 - Patient Search: Searchable list to find patients.
 - Patient Details and Visits: A patient view shows their basic information, including a datagrid to show their past visit notes.
-- Visit Note Generator: An AI powered summarization tool that produces a note from the list of symptoms and the prescription. This feature should be easy to remove from the application code, in case it does not work as expected.
 - Add New Visit Form: A form inside each patient's view allows for the addition of new visit details (date, symptoms, prescription).
 
 ## Style Guidelines:
