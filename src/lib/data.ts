@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
 });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
@@ -105,7 +105,7 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
     
     // Fallback to basic query if search fails
     if (search && search.trim()) {
-      console.log('Falling back to basic search...');
+      // console.log('Falling back to basic search...');
       return getPatientsPaginated({ ...params, search: undefined });
     }
     

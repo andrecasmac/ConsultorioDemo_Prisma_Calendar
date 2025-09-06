@@ -28,7 +28,7 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  console.log('PatientSearch component rendered with initialData:', initialData);
+  // console.log('PatientSearch component rendered with initialData:', initialData);
   
   const [data, setData] = useState<PaginatedResult<PatientSummary>>(initialData);
   const [loading, setLoading] = useState(false);
@@ -36,14 +36,14 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-  console.log('Component state:', { 
-    data, 
-    loading, 
-    error, 
-    searchTerm, 
-    debouncedSearchTerm,
-    searchParams: Object.fromEntries(searchParams.entries())
-  });
+  // console.log('Component state:', { 
+  //   data, 
+  //   loading, 
+  //   error, 
+  //   searchTerm, 
+  //   debouncedSearchTerm,
+  //   searchParams: Object.fromEntries(searchParams.entries())
+  // });
 
   // Debounce search term
   useEffect(() => {
@@ -56,7 +56,7 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
 
   // Fetch data when search term or page changes
   const fetchPatients = useCallback(async (page: number, search?: string) => {
-    console.log('fetchPatients called with:', { page, search });
+    // console.log('fetchPatients called with:', { page, search });
     setLoading(true);
     setError(null);
     try {
@@ -66,14 +66,14 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
       if (search) params.set('search', search);
       
       const url = `/api/patients?${params.toString()}`;
-      console.log('Fetching from URL:', url);
+      // console.log('Fetching from URL:', url);
       
       const response = await fetch(url);
-      console.log('Response status:', response.status);
+      // console.log('Response status:', response.status);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('Response data:', result);
+        // console.log('Response data:', result);
         setData(result);
         
         // Update URL
@@ -84,11 +84,11 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
         router.push(`?${newParams.toString()}`);
       } else {
         const errorData = await response.json();
-        console.error('API error response:', errorData);
+        // console.error('API error response:', errorData);
         throw new Error(errorData.error || 'Error fetching patients');
       }
     } catch (error) {
-      console.error('Error fetching patients:', error);
+      // console.error('Error fetching patients:', error);
       setError(error instanceof Error ? error.message : 'Error fetching patients');
     } finally {
       setLoading(false);
@@ -98,14 +98,14 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
   // Handle search
   useEffect(() => {
     const currentSearchParam = searchParams.get('search') || ''; // Normalize null to empty string
-    console.log('Search effect triggered:', { 
-      debouncedSearchTerm, 
-      currentSearch: currentSearchParam,
-      willFetch: debouncedSearchTerm !== currentSearchParam
-    });
+    // console.log('Search effect triggered:', { 
+    //   debouncedSearchTerm, 
+    //   currentSearch: currentSearchParam,
+    //   willFetch: debouncedSearchTerm !== currentSearchParam
+    // });
     
     if (debouncedSearchTerm !== currentSearchParam) {
-      console.log('Fetching patients due to search change');
+      // console.log('Fetching patients due to search change');
       fetchPatients(1, debouncedSearchTerm);
     }
   }, [debouncedSearchTerm, fetchPatients, searchParams]);
@@ -123,7 +123,7 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
   // Handle search submit
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Search form submitted with term:', searchTerm);
+    // console.log('Search form submitted with term:', searchTerm);
     fetchPatients(1, searchTerm);
   };
 

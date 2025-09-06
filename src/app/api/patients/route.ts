@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const search = searchParams.get('search') || undefined;
 
-    console.log('API Request:', { page, limit, search });
+    // console.log('API Request:', { page, limit, search });
 
     // Validate parameters
     if (page < 1 || limit < 1 || limit > 100) {
@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await getPatientsPaginated({ page, limit, search });
-    console.log('API Response:', { 
-      total: result.pagination.total, 
-      pageCount: result.pagination.totalPages,
-      dataLength: result.data.length 
-    });
+    // console.log('API Response:', { 
+    //   total: result.pagination.total, 
+    //   pageCount: result.pagination.totalPages,
+    //   dataLength: result.data.length 
+    // });
     
     // Add caching headers for better performance
     const response = NextResponse.json(result);
