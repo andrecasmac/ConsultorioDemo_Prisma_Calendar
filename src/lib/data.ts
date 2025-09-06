@@ -76,18 +76,35 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
       `;
     }
 
+    const pacientesSafe = pacientes.map((p) => ({
+      ...p,
+      visitCount: typeof p.visitCount === 'bigint' ? Number(p.visitCount) : p.visitCount,
+      // Si hay otros campos BigInt, conviértelos aquí también
+    }));
+
+    console.log(pacientesSafe);
+
     const data: PatientSummary[] = pacientes.map((p) => ({
       id: p.id.toString(),
       name: `${p.nombre || ''} ${p.apellido || ''}`,
       firstName: p.nombre || '',
       lastName: p.apellido || '',
-      dob: p.fecha_nacimiento ? format(p.fecha_nacimiento, 'yyyy-MM-dd') : '',
+      dob: p.fecha_nacimiento 
+        ? (typeof p.fecha_nacimiento.toISOString === 'function'
+            ? p.fecha_nacimiento.toISOString().slice(0, 10)
+            : String(p.fecha_nacimiento).slice(0, 10))
+        : '',
       phone: p.telefono || undefined,
       visitCount: Number(p.visitCount),
-      lastVisitDate: p.lastVisitDate ? format(new Date(p.lastVisitDate), 'yyyy-MM-dd') : undefined,
+      lastVisitDate: p.lastVisitDate 
+        ? (typeof p.lastVisitDate.toISOString === 'function'
+            ? p.lastVisitDate.toISOString().slice(0, 10)
+            : String(p.lastVisitDate).slice(0, 10))
+        : undefined,
     }));
 
     const totalPages = Math.ceil(total / limit);
+    console.log(data);
 
     return {
       data,
@@ -138,12 +155,20 @@ export async function getPatients(): Promise<Patient[]> {
     name: `${p.nombre || ''} ${p.apellido || ''}`,
     firstName: p.nombre || '',
     lastName: p.apellido || '',
-    dob: p.fecha_nacimiento ? format(p.fecha_nacimiento, 'yyyy-MM-dd') : '',
+    dob: p.fecha_nacimiento 
+      ? (typeof p.fecha_nacimiento.toISOString === 'function'
+          ? p.fecha_nacimiento.toISOString().slice(0, 10)
+          : String(p.fecha_nacimiento).slice(0, 10))
+      : '',
     phone: p.telefono || undefined,
     visits: p.visitas.map((v) => ({
       id: v.idvisitas.toString(),
       patientId: v.paciente_id.toString(),
-      date: v.fecha ? format(v.fecha, 'yyyy-MM-dd') : '',
+      date: v.fecha 
+        ? (typeof v.fecha.toISOString === 'function'
+            ? v.fecha.toISOString().slice(0, 10)
+            : String(v.fecha).slice(0, 10))
+        : '',
       padecimiento: v.padecimiento || '',
       exploracion: v.exploracion || '',
       tratamientoActual: v.tratamiento_act || '',
@@ -171,12 +196,20 @@ export async function getPatientById(id: string): Promise<Patient | undefined> {
     name: `${p.nombre || ''} ${p.apellido || ''}`,
     firstName: p.nombre || '',
     lastName: p.apellido || '',
-    dob: p.fecha_nacimiento ? format(p.fecha_nacimiento, 'yyyy-MM-dd') : '',
+    dob: p.fecha_nacimiento 
+      ? (typeof p.fecha_nacimiento.toISOString === 'function'
+          ? p.fecha_nacimiento.toISOString().slice(0, 10)
+          : String(p.fecha_nacimiento).slice(0, 10))
+      : '',
     phone: p.telefono || undefined,
     visits: p.visitas.map((v) => ({
       id: v.idvisitas.toString(),
       patientId: v.paciente_id.toString(),
-      date: v.fecha ? format(v.fecha, 'yyyy-MM-dd') : '',
+      date: v.fecha 
+        ? (typeof v.fecha.toISOString === 'function'
+            ? v.fecha.toISOString().slice(0, 10)
+            : String(v.fecha).slice(0, 10))
+        : '',
       padecimiento: v.padecimiento || '',
       exploracion: v.exploracion || '',
       tratamientoActual: v.tratamiento_act || '',
@@ -200,7 +233,11 @@ export async function createPatient(firstName: string, lastName: string, dob: Da
         name: `${newPatientRecord.nombre || ''} ${newPatientRecord.apellido || ''}`,
         firstName: newPatientRecord.nombre || '',
         lastName: newPatientRecord.apellido || '',
-        dob: newPatientRecord.fecha_nacimiento ? format(newPatientRecord.fecha_nacimiento, 'yyyy-MM-dd') : '',
+        dob: newPatientRecord.fecha_nacimiento 
+          ? (typeof newPatientRecord.fecha_nacimiento.toISOString === 'function'
+              ? newPatientRecord.fecha_nacimiento.toISOString().slice(0, 10)
+              : String(newPatientRecord.fecha_nacimiento).slice(0, 10))
+          : '',
         phone: newPatientRecord.telefono || undefined,
         visits: [],
     };
@@ -225,13 +262,17 @@ export async function addVisit(patientId: string, visitData: Omit<Visit, 'id' | 
     });
 
     return {
-        id: newVisitRecord.idvisitas.toString(),
-        patientId: newVisitRecord.paciente_id.toString(),
-        date: newVisitRecord.fecha ? format(newVisitRecord.fecha, 'yyyy-MM-dd') : '',
-        padecimiento: newVisitRecord.padecimiento || '',
-        exploracion: newVisitRecord.exploracion || '',
-        tratamientoActual: newVisitRecord.tratamiento_act || '',
-        tratamientoHomeopatico: newVisitRecord.tratamiento_hom || '',
+      id: newVisitRecord.idvisitas.toString(),
+      patientId: newVisitRecord.paciente_id.toString(),
+      date: newVisitRecord.fecha 
+        ? (typeof newVisitRecord.fecha.toISOString === 'function'
+            ? newVisitRecord.fecha.toISOString().slice(0, 10)
+            : String(newVisitRecord.fecha).slice(0, 10))
+        : '',
+      padecimiento: newVisitRecord.padecimiento || '',
+      exploracion: newVisitRecord.exploracion || '',
+      tratamientoActual: newVisitRecord.tratamiento_act || '',
+      tratamientoHomeopatico: newVisitRecord.tratamiento_hom || '',
     };
 }
 
@@ -269,7 +310,11 @@ export async function updatePatient(id: string, firstName: string, lastName: str
         name: `${updatedPatientRecord.nombre || ''} ${updatedPatientRecord.apellido || ''}`,
         firstName: updatedPatientRecord.nombre || '',
         lastName: updatedPatientRecord.apellido || '',
-        dob: updatedPatientRecord.fecha_nacimiento ? format(updatedPatientRecord.fecha_nacimiento, 'yyyy-MM-dd') : '',
+        dob: updatedPatientRecord.fecha_nacimiento 
+          ? (typeof updatedPatientRecord.fecha_nacimiento.toISOString === 'function'
+              ? updatedPatientRecord.fecha_nacimiento.toISOString().slice(0, 10)
+              : String(updatedPatientRecord.fecha_nacimiento).slice(0, 10))
+          : '',
         phone: updatedPatientRecord.telefono || undefined,
         visits: [], // Note: this doesn't return visits. Refetch if needed.
     };
@@ -308,13 +353,17 @@ export async function updateVisit(visitId: string, visitData: Omit<Visit, 'id' |
     });
 
     return {
-        id: updatedVisitRecord.idvisitas.toString(),
-        patientId: updatedVisitRecord.paciente_id.toString(),
-        date: updatedVisitRecord.fecha ? format(updatedVisitRecord.fecha, 'yyyy-MM-dd') : '',
-        padecimiento: updatedVisitRecord.padecimiento || '',
-        exploracion: updatedVisitRecord.exploracion || '',
-        tratamientoActual: updatedVisitRecord.tratamiento_act || '',
-        tratamientoHomeopatico: updatedVisitRecord.tratamiento_hom || '',
+      id: updatedVisitRecord.idvisitas.toString(),
+      patientId: updatedVisitRecord.paciente_id.toString(),
+      date: updatedVisitRecord.fecha 
+        ? (typeof updatedVisitRecord.fecha.toISOString === 'function'
+            ? updatedVisitRecord.fecha.toISOString().slice(0, 10)
+            : String(updatedVisitRecord.fecha).slice(0, 10))
+        : '',
+      padecimiento: updatedVisitRecord.padecimiento || '',
+      exploracion: updatedVisitRecord.exploracion || '',
+      tratamientoActual: updatedVisitRecord.tratamiento_act || '',
+      tratamientoHomeopatico: updatedVisitRecord.tratamiento_hom || '',
     };
 }
 
@@ -347,7 +396,11 @@ export async function getPatientVisitsPaginated(
   const data: Visit[] = visitas.map((v) => ({
     id: v.idvisitas.toString(),
     patientId: v.paciente_id.toString(),
-    date: v.fecha ? format(v.fecha, 'yyyy-MM-dd') : '',
+    date: v.fecha 
+      ? (typeof v.fecha.toISOString === 'function'
+          ? v.fecha.toISOString().slice(0, 10)
+          : String(v.fecha).slice(0, 10))
+      : '',
     padecimiento: v.padecimiento || '',
     exploracion: v.exploracion || '',
     tratamientoActual: v.tratamiento_act || '',
