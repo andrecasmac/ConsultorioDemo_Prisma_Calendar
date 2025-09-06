@@ -1,6 +1,6 @@
-
 import { notFound } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale'; // <-- Agrega esta línea
 import { getPatientById } from '@/lib/data';
 import { AddVisitForm } from '@/components/add-visit-form';
 import { DeleteVisitDialog } from '@/components/delete-visit-dialog';
@@ -45,7 +45,7 @@ export default async function PatientDetailPage({ params }: { params: { id: stri
             <div>
               <CardTitle className="font-headline text-3xl">{patient.name}</CardTitle>
               <CardDescription className="text-lg">
-                {patient.dob && `Fecha de nacimiento: ${format(parseISO(patient.dob), "d 'de' MMMM, yyyy")}`}
+                {patient.dob && `Fecha de nacimiento: ${format(parseISO(patient.dob), "d 'de' MMMM, yyyy", { locale: es })}`}
               </CardDescription>
               {patient.phone && <CardDescription className="text-base">Teléfono: {patient.phone}</CardDescription>}
             </div>
@@ -82,7 +82,7 @@ export default async function PatientDetailPage({ params }: { params: { id: stri
                     sortedVisits.map((visit) => (
                     <TableRow key={visit.id}>
                         <TableCell className="font-medium">
-                        {format(parseISO(visit.date), 'd MMM, yyyy')}
+                        {format(parseISO(visit.date), "d 'de' MMMM, yyyy", { locale: es })}
                         </TableCell>
                         <TableCell className="whitespace-pre-wrap">{visit.padecimiento}</TableCell>
                         <TableCell className="whitespace-pre-wrap">{visit.exploracion}</TableCell>

@@ -19,6 +19,7 @@ import { ChevronLeft, ChevronRight, Search, Loader2, AlertCircle } from 'lucide-
 import { TableLoadingSkeleton } from '@/components/loading-skeleton';
 import type { PatientSummary, PaginatedResult } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface PatientSearchProps {
   initialData: PaginatedResult<PatientSummary>;
@@ -190,10 +191,14 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
                     {`${patient.firstName} ${patient.lastName}`}
                   </TableCell>
                   <TableCell>
-                    {patient.dob ? format(parseISO(patient.dob), "d 'de' MMMM, yyyy") : 'N/A'}
+                    {patient.dob
+                      ? format(parseISO(patient.dob), "d 'de' MMMM, yyyy", { locale: es })
+                      : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    {patient.lastVisitDate ? format(parseISO(patient.lastVisitDate), "d 'de' MMMM, yyyy") : 'N/A'}
+                    {patient.lastVisitDate
+                      ? format(parseISO(patient.lastVisitDate), "d 'de' MMMM, yyyy", { locale: es })
+                      : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{patient.visitCount}</Badge>
