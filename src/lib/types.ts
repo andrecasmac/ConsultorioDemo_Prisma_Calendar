@@ -28,6 +28,7 @@ export interface PatientSummary {
   dob?: string;
   phone?: string;
   visitCount: number;
+  lastVisitDate?: string; // ISO 8601 format
 }
 
 // Pagination types

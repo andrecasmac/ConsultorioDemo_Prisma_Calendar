@@ -97,13 +97,14 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
 
   // Handle search
   useEffect(() => {
+    const currentSearchParam = searchParams.get('search') || ''; // Normalize null to empty string
     console.log('Search effect triggered:', { 
       debouncedSearchTerm, 
-      currentSearch: searchParams.get('search'),
-      willFetch: debouncedSearchTerm !== searchParams.get('search')
+      currentSearch: currentSearchParam,
+      willFetch: debouncedSearchTerm !== currentSearchParam
     });
     
-    if (debouncedSearchTerm !== searchParams.get('search')) {
+    if (debouncedSearchTerm !== currentSearchParam) {
       console.log('Fetching patients due to search change');
       fetchPatients(1, debouncedSearchTerm);
     }
@@ -170,6 +171,7 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Fecha de Nacimiento</TableHead>
+              <TableHead>Última Visita</TableHead>
               <TableHead>Visitas</TableHead>
               <TableHead className="text-right">Ver</TableHead>
             </TableRow>
@@ -191,10 +193,13 @@ export function PatientSearch({ initialData }: PatientSearchProps) {
                     {patient.dob ? format(parseISO(patient.dob), "d 'de' MMMM, yyyy") : 'N/A'}
                   </TableCell>
                   <TableCell>
+                    {patient.lastVisitDate ? format(parseISO(patient.lastVisitDate), "d 'de' MMMM, yyyy") : 'N/A'}
+                  </TableCell>
+                  <TableCell>
                     <Badge variant="secondary">{patient.visitCount}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link href={`/dashboard/patients/${patient.id}`} className="text-primary hover:underline">
+                    <Link href={`/patients/${patient.id}`} className="text-primary hover:underline">
                       Detalles
                     </Link>
                   </TableCell>

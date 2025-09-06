@@ -43,34 +43,35 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
           p.apellido,
           p.fecha_nacimiento,
           p.telefono,
-          COUNT(v.idvisitas) as visitCount
+          COUNT(v.idvisitas) as visitCount,
+          MAX(v.fecha) as lastVisitDate
         FROM pacientes p
         LEFT JOIN visitas v ON p.id = v.paciente_id
         WHERE LOWER(p.nombre) LIKE LOWER(${searchTerm}) 
            OR LOWER(p.apellido) LIKE LOWER(${searchTerm})
         GROUP BY p.id, p.nombre, p.apellido, p.fecha_nacimiento, p.telefono
-        ORDER BY p.nombre ASC
+        ORDER BY CASE WHEN lastVisitDate IS NULL THEN 1 ELSE 0 END, lastVisitDate DESC, p.nombre ASC
         LIMIT ${limit} OFFSET ${skip}
       `;
     } else {
       // No search - use regular Prisma query
       total = await prisma.pacientes.count();
       
-      pacientes = await prisma.pacientes.findMany({
-        select: {
-          id: true,
-          nombre: true,
-          apellido: true,
-          fecha_nacimiento: true,
-          telefono: true,
-          _count: {
-            select: { visitas: true }
-          }
-        },
-        skip,
-        take: limit,
-        orderBy: { nombre: 'asc' }
-      });
+      pacientes = await prisma.$queryRaw<any[]>`
+        SELECT 
+          p.id,
+          p.nombre,
+          p.apellido,
+          p.fecha_nacimiento,
+          p.telefono,
+          COUNT(v.idvisitas) as visitCount,
+          MAX(v.fecha) as lastVisitDate
+        FROM pacientes p
+        LEFT JOIN visitas v ON p.id = v.paciente_id
+        GROUP BY p.id, p.nombre, p.apellido, p.fecha_nacimiento, p.telefono
+        ORDER BY CASE WHEN lastVisitDate IS NULL THEN 1 ELSE 0 END, lastVisitDate DESC, p.nombre ASC
+        LIMIT ${limit} OFFSET ${skip}
+      `;
     }
 
     const data: PatientSummary[] = pacientes.map((p) => ({
@@ -80,7 +81,8 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
       lastName: p.apellido || '',
       dob: p.fecha_nacimiento ? format(p.fecha_nacimiento, 'yyyy-MM-dd') : '',
       phone: p.telefono || undefined,
-      visitCount: search ? Number(p.visitCount) : p._count.visitas,
+      visitCount: Number(p.visitCount),
+      lastVisitDate: p.lastVisitDate ? format(new Date(p.lastVisitDate), 'yyyy-MM-dd') : undefined,
     }));
 
     const totalPages = Math.ceil(total / limit);

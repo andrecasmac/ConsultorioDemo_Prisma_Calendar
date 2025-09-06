@@ -46,7 +46,7 @@ export function DeletePatientDialog({ patientId }: DeletePatientDialogProps) {
             description: 'El paciente ha sido eliminado.',
         });
         setOpen(false);
-        // router.push('/dashboard') is handled by the redirect in the action
+        router.push('/');
     }
   };
 
