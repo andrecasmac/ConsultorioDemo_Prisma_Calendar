@@ -76,14 +76,6 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
       `;
     }
 
-    const pacientesSafe = pacientes.map((p) => ({
-      ...p,
-      visitCount: typeof p.visitCount === 'bigint' ? Number(p.visitCount) : p.visitCount,
-      // Si hay otros campos BigInt, conviértelos aquí también
-    }));
-
-    console.log(pacientesSafe);
-
     const data: PatientSummary[] = pacientes.map((p) => ({
       id: p.id.toString(),
       name: `${p.nombre || ''} ${p.apellido || ''}`,
@@ -104,7 +96,6 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
     }));
 
     const totalPages = Math.ceil(total / limit);
-    console.log(data);
 
     return {
       data,
