@@ -32,6 +32,7 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
         FROM pacientes 
         WHERE LOWER(nombre) LIKE LOWER(${searchTerm}) 
            OR LOWER(apellido) LIKE LOWER(${searchTerm})
+           OR LOWER(CONCAT(nombre, ' ', apellido)) LIKE LOWER(${searchTerm})
       `;
       total = Number(countResult[0].count);
 
@@ -49,6 +50,7 @@ export async function getPatientsPaginated(params: PaginationParams): Promise<Pa
         LEFT JOIN visitas v ON p.id = v.paciente_id
         WHERE LOWER(p.nombre) LIKE LOWER(${searchTerm}) 
            OR LOWER(p.apellido) LIKE LOWER(${searchTerm})
+           OR LOWER(CONCAT(p.nombre, ' ', p.apellido)) LIKE LOWER(${searchTerm})
         GROUP BY p.id, p.nombre, p.apellido, p.fecha_nacimiento, p.telefono
         ORDER BY CASE WHEN lastVisitDate IS NULL THEN 1 ELSE 0 END, lastVisitDate DESC, p.nombre ASC
         LIMIT ${limit} OFFSET ${skip}
