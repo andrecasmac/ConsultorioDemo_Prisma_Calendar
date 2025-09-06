@@ -32,9 +32,9 @@ export async function createPatientAction(formData: FormData) {
   const dobDate = parse(validatedFields.data.dob, 'dd-MM-yyyy', new Date());
 
   try {
-    await createPatient(validatedFields.data.firstName, validatedFields.data.lastName, dobDate, validatedFields.data.phone);
-    revalidatePath('/dashboard');
-    return { success: true };
+    const newPatient = await createPatient(validatedFields.data.firstName, validatedFields.data.lastName, dobDate, validatedFields.data.phone);
+    revalidatePath('/');
+    return { success: true, patientId: newPatient.id };
   } catch (error) {
     return { errors: { _form: ['Error al crear el paciente.'] } };
   }
@@ -59,8 +59,8 @@ export async function updatePatientAction(formData: FormData) {
 
   try {
     await updatePatient(validatedFields.data.id, validatedFields.data.firstName, validatedFields.data.lastName, dobDate, validatedFields.data.phone);
-    revalidatePath(`/dashboard/patients/${validatedFields.data.id}`);
-    revalidatePath('/dashboard');
+    revalidatePath(`/patients/${validatedFields.data.id}`);
+    revalidatePath('/');
     return { success: true };
   } catch (error) {
     return { errors: { _form: ['Error al actualizar el paciente.'] } };
@@ -70,11 +70,10 @@ export async function updatePatientAction(formData: FormData) {
 export async function deletePatientAction(patientId: string) {
     try {
         await deletePatient(patientId);
-        revalidatePath('/dashboard');
+        revalidatePath('/');
     } catch (error) {
         return { errors: { _form: ['Error al eliminar el paciente.'] } };
     }
-    redirect('/dashboard');
 }
 
 const visitSchema = z.object({
@@ -104,7 +103,7 @@ export async function addVisitAction(values: z.infer<typeof visitSchema>) {
         };
 
         await addVisit(patientId, newVisit);
-        revalidatePath(`/dashboard/patients/${patientId}`);
+        revalidatePath(`/patients/${patientId}`);
         return { success: true };
     } catch (error) {
         return { errors: { _form: ['Error al añadir la visita.'] } };
@@ -130,7 +129,7 @@ export async function updateVisitAction(values: z.infer<typeof visitSchema>) {
         const updatedVisitData: Omit<Visit, 'id' | 'patientId'> = { ...visitData };
 
         await updateVisit(visitId!, updatedVisitData);
-        revalidatePath(`/dashboard/patients/${patientId}`);
+        revalidatePath(`/patients/${patientId}`);
         return { success: true };
     } catch (error) {
         return { errors: { _form: ['Error al actualizar la visita.'] } };
@@ -140,7 +139,7 @@ export async function updateVisitAction(values: z.infer<typeof visitSchema>) {
 export async function deleteVisitAction(patientId: string, visitId: string) {
     try {
         await deleteVisit(patientId, visitId);
-        revalidatePath(`/dashboard/patients/${patientId}`);
+        revalidatePath(`/patients/${patientId}`);
         return { success: true };
     } catch (error) {
         return { errors: { _form: ['Error al eliminar la visita.'] } };

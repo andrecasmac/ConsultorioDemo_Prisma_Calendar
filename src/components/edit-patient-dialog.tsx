@@ -42,17 +42,16 @@ export function EditPatientDialog({ patient }: EditPatientDialogProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const {
-    control,
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
         firstName: patient.firstName,
         lastName: patient.lastName,
-        dob: parseISO(patient.dob),
+        dob: patient.dob ? parseISO(patient.dob) : new Date(),
         phone: patient.phone
     }
   });

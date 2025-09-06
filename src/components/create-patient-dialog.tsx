@@ -9,6 +9,7 @@ import DatePicker from 'react-datepicker';
 import { registerLocale, setDefaultLocale } from  "react-datepicker";
 import { es } from 'date-fns/locale/es';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -40,6 +41,7 @@ type PatientFormValues = z.infer<typeof patientFormSchema>;
 export function CreatePatientDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
   const {
     control,
     register,
@@ -67,6 +69,7 @@ export function CreatePatientDialog() {
       });
       setOpen(false);
       reset();
+      router.push(`/patients/${result.patientId}`);
     } else if(result?.errors) {
        const errorMessages = Object.values(result.errors).flat().join(', ');
        toast({

@@ -16,13 +16,8 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/logo';
-import { Button } from '@/components/ui/button';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isActive = (path: string) => pathname === path;
 
@@ -37,12 +32,12 @@ export default function DashboardLayout({
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                isActive={isActive('/dashboard')}
-                tooltip="Tablero"
+                isActive={isActive('/')}
+                tooltip="Home"
               >
-                <Link href="/dashboard">
+                <Link href="/">
                   <Home />
-                  <span>Tablero</span>
+                  <span>Home</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -51,23 +46,22 @@ export default function DashboardLayout({
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Cerrar sesión">
-                    <Link href="/">
-                        <LogOut />
-                        <span>Cerrar sesión</span>
-                    </Link>
-                </SidebarMenuButton>
+              <SidebarMenuButton asChild tooltip="Cerrar sesión">
+                <Link href="/">
+                  <LogOut />
+                  <span>Cerrar sesión</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:py-4">
-             <SidebarTrigger className="sm:hidden" />
-             {/* Header content can be driven by pages */}
+          <SidebarTrigger className="sm:hidden" />
         </header>
         <main className="flex-1 p-4 sm:px-6 sm:py-0">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
-}
+} 

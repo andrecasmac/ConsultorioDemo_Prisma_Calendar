@@ -12,23 +12,29 @@ datasource db {
 
 model pacientes {
   id               Int       @id @default(autoincrement())
-  nombre           String?   @db.VarChar(45)
-  apellido         String?   @db.VarChar(45)
+  nombre           String?   @db.VarChar(255)
+  apellido         String?   @db.VarChar(255)
   fecha_nacimiento DateTime? @db.Date
-  telefono         String?   @db.VarChar(45)
+  telefono         String?   @db.VarChar(255)
   visitas          visitas[]
+
+  // Indexes for search and pagination performance
+  @@index([nombre], map: "idx_pacientes_nombre")
+  @@index([apellido], map: "idx_pacientes_apellido")
+  @@index([nombre, apellido], map: "idx_pacientes_nombre_apellido")
 }
 
 model visitas {
   idvisitas             Int        @id @default(autoincrement())
   fecha                 DateTime?  @db.Date
-  padecimiento          String?    @db.VarChar(600)
-  exploracion           String?    @db.VarChar(500)
-  tratamiento_act       String?    @db.VarChar(255)
-  tratamiento_hom       String?    @db.VarChar(255)
+  padecimiento          String?    @db.Text
+  exploracion           String?    @db.Text
+  tratamiento_act       String?    @db.Text
+  tratamiento_hom       String?    @db.Text
   paciente_id           Int
   paciente              pacientes  @relation(fields: [paciente_id], references: [id])
 
   @@index([paciente_id], map: "visitas_paciente_id_fkey")
+  @@index([fecha], map: "idx_visitas_fecha")
 }
 
